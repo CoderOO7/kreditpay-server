@@ -1,0 +1,6 @@
+*.env
+*.DB_Store
+
+dist
+node_modules
+test.rest
