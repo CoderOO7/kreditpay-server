@@ -20,12 +20,12 @@ const _getHashedPassword = async (password) => {
   return hash;
 };
 
-const _createToken = async (userRole) => {
+const _createToken = async ({ role: userRole, _id: userId }) => {
   let token = null;
   try {
-    const payload = { userRole };
+    const payload = { userRole, userId };
     const secret = process.env.JWT_SECRET;
-    const options = { expiresIn: "2d" };
+    const options = { expiresIn: "1d" };
 
     token = await jwt.sign(payload, secret, options);
   } catch (err) {
@@ -133,8 +133,7 @@ exports.postLogin = async (req, res) => {
 
       if (match) {
         //Create a token
-        const accessToken = await _createToken(user.role);
-        console.log();
+        const accessToken = await _createToken(user);
         // Update newly generated token in db
         await User.findByIdAndUpdate(user._id, { access_token: accessToken });
 
@@ -365,7 +364,9 @@ exports.createUser = async (req, res) => {
     const payload = req.decoded;
     if (payload) {
       if (payload.userRole !== "admin") {
-        const { isValid, errors } = validateUserCreateORUpdateInputs(req.body);
+        const { isValid, errors } = validateUserCreatestatORUpdateInputs(
+          req.body
+        );
 
         if (!isValid) {
           status = 422;

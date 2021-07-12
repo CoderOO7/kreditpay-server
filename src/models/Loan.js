@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 const { loanStatus } = require("../utils/loan");
 
 const loanSchema = new mongoose.Schema(
@@ -30,13 +31,14 @@ const loanSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: [
-        loanStatus.NEW,
-        loanStatus.PENDING,
-        loanStatus.REJECTED,
-        loanStatus.APPROVED,
-      ],
+      enum: [loanStatus.NEW, loanStatus.REJECTED, loanStatus.APPROVED],
       required: true,
+    },
+
+    customerEmail: {
+      type: String,
+      required: true,
+      validate: (value) => validator.isEmail(value),
     },
   },
   { timestamps: true }

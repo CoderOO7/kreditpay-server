@@ -19,11 +19,25 @@ module.exports = {
         // pass execution to subsequent middleware
         next();
       } catch (err) {
-        throw new Error(err);
+        result = {
+          errors: [
+            {
+              title: "Authentication Error",
+              message: "Provided Token is invalid",
+            },
+          ],
+          status: 401,
+        };
+        res.status(401).send(result);
       }
     } else {
       result = {
-        error: `Authentication Error. Token required.`,
+        errors: [
+          {
+            title: "Authentication Error",
+            message: "Token is required",
+          },
+        ],
         status: 401,
       };
       res.status(401).send(result);
