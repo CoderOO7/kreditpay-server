@@ -60,6 +60,33 @@ exports.getUser = async (req, res) => {
 };
 
 /**
+ * GET v1/user/me
+ * Return the loggedIn user data
+ */
+exports.geLoggedInUser = async (req, res) => {
+  const result = {};
+  let status = 200;
+
+  try {
+    const payload = req.decoded;
+    if (payload.userId) {
+      const user = await User.findById(payload.userId);
+
+      result.data = user;
+      result.status = status;
+      return res.status(status).json(result);
+    }
+  } catch (err) {
+    console.error(err);
+
+    status = 500;
+    result.status = status;
+    result.error = err;
+  }
+  return res.status(status).json(result);
+};
+
+/**
  * GET v1/users
  * Return all users from database
  */

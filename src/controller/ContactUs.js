@@ -34,5 +34,5 @@ exports.postContactUs = async (req, res) => {
       ];
     }
   }
-  return res.state(status).json(result);
+  return res.status(status).json(result);
 };
