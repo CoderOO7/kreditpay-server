@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
@@ -20,6 +21,10 @@ const _getHashedPassword = async (password) => {
   return hash;
 };
 
+const _getPublicFields = () => {
+  return ["first_name", "last_name", "email", "role", "updatedAt", "createdAt"];
+};
+
 const _createToken = async ({ role: userRole, _id: userId }) => {
   let token = null;
   try {
@@ -39,12 +44,14 @@ const _createToken = async ({ role: userRole, _id: userId }) => {
  * Return the user data
  */
 exports.getUser = async (req, res) => {
-  let result = {};
+  const result = {};
   let status = 200;
 
   try {
     const userId = req.params.id;
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select(
+      _getPublicFields().join(" ")
+    );
 
     result.data = user;
     result.status = status;
@@ -70,7 +77,9 @@ exports.geLoggedInUser = async (req, res) => {
   try {
     const payload = req.decoded;
     if (payload.userId) {
-      const user = await User.findById(payload.userId);
+      const user = await User.findById(payload.userId).select(
+        _getPublicFields().join(" ")
+      );
 
       result.data = user;
       result.status = status;
@@ -91,7 +100,7 @@ exports.geLoggedInUser = async (req, res) => {
  * Return all users from database
  */
 exports.getUsers = async (req, res) => {
-  let result = {};
+  const result = {};
   let status = 200;
 
   try {
@@ -99,7 +108,9 @@ exports.getUsers = async (req, res) => {
 
     if (payload) {
       if (payload.userRole !== "admin") {
-        const users = [...(await User.find({}))];
+        const users = [
+          ...(await User.find({}).select(_getPublicFields().join(" "))),
+        ];
         result.data = users;
         result.status = status;
         res.status(status).json(result);
@@ -140,7 +151,7 @@ exports.getUsers = async (req, res) => {
  *  login using email and password
  */
 exports.postLogin = async (req, res) => {
-  let result = {};
+  const result = {};
   let status = 201;
 
   try {
@@ -155,11 +166,11 @@ exports.postLogin = async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (user) {
-      //validate passoword
+      // validate passoword
       const match = await bcrypt.compare(password, user.hashed_password);
 
       if (match) {
-        //Create a token
+        // Create a token
         const accessToken = await _createToken(user);
         // Update newly generated token in db
         await User.findByIdAndUpdate(user._id, { access_token: accessToken });
@@ -205,7 +216,7 @@ exports.postLogin = async (req, res) => {
  *  Create a new user account
  */
 exports.postSignup = async (req, res) => {
-  let result = {};
+  const result = {};
   let status = 201;
 
   try {
@@ -217,9 +228,9 @@ exports.postSignup = async (req, res) => {
       return res.status(status).json(result);
     }
 
-    let { first_name, last_name, password, email, role } = req.body;
+    const { first_name, last_name, password, email } = req.body;
     const hashed_password = await _getHashedPassword(password);
-    role = role || "customer";
+    const role = req.body.role || "customer";
 
     const newUser = new User({
       first_name,
@@ -325,7 +336,7 @@ exports.updateUser = async (req, res) => {
     if (payload) {
       if (payload.userRole !== "admin") {
         const { id } = req.params;
-        let { first_name, last_name, email, role } = req.body;
+        const { first_name, last_name, email, role } = req.body;
 
         const userData = await User.findOneAndUpdate(
           { _id: id },
@@ -391,9 +402,7 @@ exports.createUser = async (req, res) => {
     const payload = req.decoded;
     if (payload) {
       if (payload.userRole !== "admin") {
-        const { isValid, errors } = validateUserCreatestatORUpdateInputs(
-          req.body
-        );
+        const { isValid, errors } = validateUserCreateORUpdateInputs(req.body);
 
         if (!isValid) {
           status = 422;
@@ -401,7 +410,7 @@ exports.createUser = async (req, res) => {
           return res.status(status).json(result);
         }
 
-        let { first_name, last_name, email, role } = req.body;
+        const { first_name, last_name, email, role } = req.body;
 
         const newUser = new User({
           first_name,
@@ -410,7 +419,7 @@ exports.createUser = async (req, res) => {
           role,
         });
 
-        //save new user
+        // save new user
         await newUser.save();
 
         result.data = [newUser];
