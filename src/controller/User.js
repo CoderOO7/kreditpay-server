@@ -241,7 +241,7 @@ exports.postSignup = async (req, res) => {
     });
 
     // Create a token
-    const accessToken = await _createToken(newUser.role);
+    const accessToken = await _createToken(newUser);
     newUser.access_token = accessToken;
 
     // save user
