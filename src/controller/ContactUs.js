@@ -19,7 +19,6 @@ exports.postContactUs = async (req, res) => {
     const { name, email, message } = req.body;
     const newContact = new ContactUs({ name, email, message });
     await newContact.save();
-    res.status(status).json(result);
   } catch (err) {
     if (err.name === "ValidationError") {
       status = 422;
