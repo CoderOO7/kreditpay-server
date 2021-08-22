@@ -10,7 +10,7 @@ module.exports = {
     if (authorizationHeader) {
       const token = req.headers.authorization.split(" ")[1];
       const options = {
-        expiresIn: "2d",
+        expiresIn: "1d",
       };
       try {
         // return decoded token

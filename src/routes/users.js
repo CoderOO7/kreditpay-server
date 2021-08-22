@@ -4,9 +4,11 @@ const { validateToken } = require("../utils/jwt");
 module.exports = (router) => {
   router.route("/v1/users").get(validateToken, controller.getUsers);
 
+  router.route("/v1/users/me").get(validateToken, controller.geLoggedInUser);
+
   router.route("/v1/users/").post(validateToken, controller.createUser);
 
-  router.route("/v1/users/:id").get(controller.getUser);
+  router.route("/v1/users/:id").get(validateToken, controller.getUser);
 
   router.route("/v1/users/:id").delete(validateToken, controller.deleteUser);
 
