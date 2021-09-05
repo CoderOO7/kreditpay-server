@@ -166,16 +166,16 @@ exports.postLogin = async (req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     if (user) {
-      // validate passoword
+      // validate password
       const match = await bcrypt.compare(password, user.hashed_password);
-
       if (match) {
         // Create a token
         const accessToken = await _createToken(user);
         // Update newly generated token in db
-        await User.findByIdAndUpdate(user._id, { access_token: accessToken });
-
-        const { _id, type, full_name, role, access_token } = user;
+        const updatedUser = await User.findByIdAndUpdate(user._id, {
+          access_token: accessToken,
+        });
+        const { _id, type, full_name, role, access_token } = updatedUser;
         result.data = [{ _id, type, full_name, role, access_token }];
       } else {
         status = 401;
