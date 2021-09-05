@@ -172,9 +172,15 @@ exports.postLogin = async (req, res) => {
         // Create a token
         const accessToken = await _createToken(user);
         // Update newly generated token in db
-        const updatedUser = await User.findByIdAndUpdate(user._id, {
-          access_token: accessToken,
-        });
+        const updatedUser = await User.findByIdAndUpdate(
+          user._id,
+          {
+            access_token: accessToken,
+          },
+          {
+            new: true,
+          }
+        );
         const { _id, type, full_name, role, access_token } = updatedUser;
         result.data = [{ _id, type, full_name, role, access_token }];
       } else {
