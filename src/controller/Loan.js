@@ -35,7 +35,7 @@ const calculateRepaymentAmount = ({
  * POST /v1/loan
  * Create new loan for a valid user
  */
-exports.createNewLoan = async (req, res) => {
+/* exports.createNewLoan = async (req, res) => {
   const result = {};
   let status = 201;
 
@@ -120,6 +120,35 @@ exports.createNewLoan = async (req, res) => {
         },
       ];
     }
+  } catch (err) {
+    console.error(err);
+
+    status = 500;
+    result.errors = [
+      {
+        title: "Server error",
+        message: "You may try again or wait till the error get resolve.",
+      },
+    ];
+  }
+  return res.status(status).json(result);
+}; */
+
+exports.createNewLoan = async (req, res) => {
+  const result = { message: "Loan Created Successfully" };
+  let status = 201;
+
+  try {
+    const {
+      daysToRepay,
+      borrowAmount,
+      investAmount,
+      interestPerDay,
+      borrowCurrencyType,
+      investCurrencyType,
+    } = req.body;
+    const payload = req.decoded;
+    return res.status(status).json(result);
   } catch (err) {
     console.error(err);
 
