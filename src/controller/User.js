@@ -105,14 +105,24 @@ exports.getUsers = async (req, res) => {
 
   try {
     const payload = req.decoded;
-
     if (payload) {
       if (payload.userRole !== "admin") {
+        const offset = Number(req.query.offset) || 0;
+        const limit = Number(req.query.limit) || 100;
         const users = [
-          ...(await User.find({}).select(_getPublicFields().join(" "))),
+          ...(await User.find({})
+            .skip(offset)
+            .limit(limit)
+            .select(_getPublicFields().join(" "))),
         ];
+        const total = await User.estimatedDocumentCount();
         result.data = users;
         result.status = status;
+        result.pagination = {
+          offset,
+          limit,
+          total,
+        };
         res.status(status).json(result);
       } else {
         status = 403;
