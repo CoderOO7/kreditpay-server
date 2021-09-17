@@ -110,12 +110,12 @@ exports.getUsers = async (req, res) => {
         const offset = Number(req.query.offset) || 0;
         const limit = Number(req.query.limit) || 100;
         const users = [
-          ...(await User.find({})
+          ...(await User.find({ _id: { $ne: payload.userId } })
             .skip(offset)
             .limit(limit)
             .select(_getPublicFields().join(" "))),
         ];
-        const total = await User.estimatedDocumentCount();
+        const total = (await User.estimatedDocumentCount()) - 1;
         result.data = users;
         result.status = status;
         result.pagination = {
