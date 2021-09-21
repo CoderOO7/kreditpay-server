@@ -57,4 +57,40 @@ function validateUserCreateORUpdateInputs(_data) {
   };
 }
 
-module.exports = { validateUserCreateORUpdateInputs };
+function validatePaginationForUsers(_query) {
+  const query = _.cloneDeep(_query);
+  const errors = [];
+  let error = {};
+  const title = "Validation error";
+
+  query.offset = !isEmpty(query.offset) ? query.offset : 100;
+  query.limit = !isEmpty(query.limit) ? query.limit : 100;
+
+  if (Validator.isNumber(query.offset) && query.offset < 0) {
+    error = {};
+    error.last_name = {
+      title,
+      message:
+        "In request query offset should be a number and can't be negative",
+    };
+    errors.push(error);
+  }
+  if (Validator.isNumber(query.limit)) {
+    error = {};
+    error.last_name = {
+      title,
+      message: "In request query limit should be a number",
+    };
+    errors.push(error);
+  }
+
+  return {
+    errors,
+    isValid: isEmpty(errors),
+  };
+}
+
+module.exports = {
+  validateUserCreateORUpdateInputs,
+  validatePaginationForUsers,
+};

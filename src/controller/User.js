@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const { validateLoginInputs } = require("../validation/login");
+const { default: validatePagination } = require("../validation/pagination");
 const { validateSignUpInputs } = require("../validation/signUp");
 const { validateUserCreateORUpdateInputs } = require("../validation/user");
 
@@ -107,6 +108,13 @@ exports.getUsers = async (req, res) => {
     const payload = req.decoded;
     if (payload) {
       if (payload.userRole !== "admin") {
+        const { isValid, errors } = validatePagination(req.query);
+        if (!isValid) {
+          status = 422;
+          result.errors = errors;
+          return res.status(status).json(result);
+        }
+
         const offset = Number(req.query.offset) || 0;
         const limit = Number(req.query.limit) || 100;
         const users = [
