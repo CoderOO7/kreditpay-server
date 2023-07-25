@@ -1,3 +1,5 @@
+const fs = require("fs");
+const https= require("https");
 const createError = require("http-errors");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
@@ -26,9 +28,16 @@ const MONGODB_URI = process.env.MONGODB_URI;
 const routes = require("./routes/routes");
 
 /**
+ * Retreiving TLS/SSL certificate credentials
+ */
+const key = fs.readFileSync("ssl-key.pem", "utf-8");
+const cert = fs.readFileSync("ssl.pem", "utf-8");
+
+/**
  * Create Express Server
  */
 const app = express();
+
 
 /**
  * Express configuration
@@ -83,9 +92,10 @@ export const start = async () => {
   /**
    * Start express server listener
    */
-  app.listen(app.get("port"), () => {
+
+  https.createServer({key, cert}, app).listen(app.get("port"), () => {
     console.log(
-      `Server running at http://${app.get("host")}:${app.get("port")}`
+      `Server running at https://${app.get("host")}:${app.get("port")}`
     );
   });
 };
