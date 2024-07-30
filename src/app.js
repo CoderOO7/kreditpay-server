@@ -1,5 +1,5 @@
 const fs = require("fs");
-const https= require("https");
+const https = require("https");
 const createError = require("http-errors");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
@@ -21,6 +21,7 @@ const isDevelopment = process.env.NODE_ENV === "development";
 const PORT = process.env.PORT || 3000;
 const HOSTNAME = process.env.HOST || "0.0.0.0";
 const MONGODB_URI = process.env.MONGODB_URI;
+const ALLOW_HTTPS = !!JSON.parse(process.env.ALLOW_HTTPS ?? false);
 
 /**
  * Routers
@@ -28,16 +29,9 @@ const MONGODB_URI = process.env.MONGODB_URI;
 const routes = require("./routes/routes");
 
 /**
- * Retreiving TLS/SSL certificate credentials
- */
-const key = fs.readFileSync("ssl-key.pem", "utf-8");
-const cert = fs.readFileSync("ssl.pem", "utf-8");
-
-/**
  * Create Express Server
  */
 const app = express();
-
 
 /**
  * Express configuration
@@ -92,12 +86,24 @@ export const start = async () => {
   /**
    * Start express server listener
    */
-
-  https.createServer({key, cert}, app).listen(app.get("port"), () => {
-    console.log(
-      `Server running at https://${app.get("host")}:${app.get("port")}`
-    );
-  });
+  if (ALLOW_HTTPS === true) {
+    /**
+     * Retreiving TLS/SSL certificate credentials
+     */
+    const key = fs.readFileSync("ssl-key.pem", "utf-8");
+    const cert = fs.readFileSync("ssl.pem", "utf-8");
+    https.createServer({ key, cert }, app).listen(app.get("port"), () => {
+      console.log(
+        `Server running at https://${app.get("host")}:${app.get("port")}`
+      );
+    });
+  } else {
+    app.listen(app.get("port"), () => {
+      console.log(
+        `Server running at https://${app.get("host")}:${app.get("port")}`
+      );
+    });
+  }
 };
 
 export const stop = () => {
